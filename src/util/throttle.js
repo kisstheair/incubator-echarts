@@ -33,9 +33,9 @@ var THROTTLE_TYPE = '\0__throttleType';
  */
 export function throttle(fn, delay, debounce) {
 
-    var currCall;
-    var lastCall = 0;
-    var lastExec = 0;
+    var currCall;            //本地调用   开始时间
+    var lastCall = 0;        //上次调用   开始时间
+    var lastExec = 0;        //最后一次执行 开始时间
     var timer = null;
     var diff;
     var scope;
@@ -47,7 +47,7 @@ export function throttle(fn, delay, debounce) {
     function exec() {
         lastExec = (new Date()).getTime();
         timer = null;
-        fn.apply(scope, args || []);
+        fn.apply(scope, args || []);            //一个函数能够执行需要（1.作用域，  2.参数）
     }
 
     var cb = function () {
@@ -55,7 +55,7 @@ export function throttle(fn, delay, debounce) {
         scope = this;
         args = arguments;
         var thisDelay = debounceNextCall || delay;
-        var thisDebounce = debounceNextCall || debounce;
+        var thisDebounce = debounceNextCall || debounce;             //debounce防抖动， 防抖动就是不失帧，      如果开启防抖动，就
         debounceNextCall = null;
         diff = currCall - (thisDebounce ? lastCall : lastExec) - thisDelay;
 

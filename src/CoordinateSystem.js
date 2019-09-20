@@ -19,11 +19,11 @@
 
 import * as zrUtil from 'zrender/src/core/util';
 
-var coordinateSystemCreators = {};
+var coordinateSystemCreators = {};               //坐标系系统， 注册的生成器放到这里
 
 function CoordinateSystemManager() {
 
-    this._coordinateSystems = [];
+    this._coordinateSystems = [];              //生成的坐标系统， 放到这里
 }
 
 CoordinateSystemManager.prototype = {

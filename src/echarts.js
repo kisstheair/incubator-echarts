@@ -112,7 +112,7 @@ function createRegisterEventWithLowercaseName(method, ignoreDisposed) {
 }
 
 /**
- * @module echarts~MessageCenter
+ * @module echarts~MessageCenter            来自于Zrender的 eventful    可以 on， off ，one，   触发用： this._messageCenter.trigger(eventObj.type, eventObj);
  */
 function MessageCenter() {
     Eventful.call(this);
@@ -161,7 +161,7 @@ function ECharts(dom, theme, opts) {
      * @type {module:zrender/ZRender}
      * @private
      */
-    var zr = this._zr = zrender.init(dom, {
+    var zr = this._zr = zrender.init(dom, {                            //初始化的时候就创建了zrender
         renderer: opts.renderer || defaultRenderer,
         devicePixelRatio: opts.devicePixelRatio,
         width: opts.width,
@@ -173,7 +173,7 @@ function ECharts(dom, theme, opts) {
      * @type {Function}
      * @private
      */
-    this._throttledZrFlush = throttle(zrUtil.bind(zr.flush, zr), 17);
+    this._throttledZrFlush = throttle(zrUtil.bind(zr.flush, zr), 17);           //延时17ms 再执行
 
     var theme = zrUtil.clone(theme);
     theme && backwardCompat(theme, true);
@@ -187,10 +187,10 @@ function ECharts(dom, theme, opts) {
      * @type {Array.<module:echarts/view/Chart>}
      * @private
      */
-    this._chartsViews = [];
+    this._chartsViews = [];                                  //(保存View数据)  和下面的格式不一样而已
 
     /**
-     * @type {Object.<string, module:echarts/view/Chart>}
+     * @type {Object.<string, module:echarts/view/Chart>}    //(保存View数据)
      * @private
      */
     this._chartsMap = {};
@@ -229,7 +229,7 @@ function ECharts(dom, theme, opts) {
     /**
      * @type {module:echarts/stream/Scheduler}
      */
-    this._scheduler = new Scheduler(this, api, dataProcessorFuncs, visualFuncs);
+    this._scheduler = new Scheduler(this, api, dataProcessorFuncs, visualFuncs);      //初始化的时候就创建了_scheduler 任务调度器
 
     Eventful.call(this, this._ecEventProcessor = new EventProcessor());
 
@@ -237,7 +237,7 @@ function ECharts(dom, theme, opts) {
      * @type {module:echarts~MessageCenter}
      * @private
      */
-    this._messageCenter = new MessageCenter();
+    this._messageCenter = new MessageCenter();       //这里当作是事件总线，绑定  this._messageCenter.on(eventType, function (event) {}）      触发  this._messageCenter.trigger(eventObj.type, eventObj);
 
     // Init mouse events
     this._initEvents();
@@ -384,9 +384,9 @@ echartsProto.setOption = function (option, notMerge, lazyUpdate) {
         this[IN_MAIN_PROCESS] = false;
     }
     else {
-        prepare(this);
+        prepare(this);                       // 准备数据，主要操作的 schdule 调度器
 
-        updateMethods.update.call(this);
+        updateMethods.update.call(this);     // 更新视图
 
         // Ensure zr refresh sychronously, and then pixel in canvas can be
         // fetched after `setOption`.
@@ -808,6 +808,18 @@ echartsProto.getViewOfSeriesModel = function (seriesModel) {
     return this._chartsMap[seriesModel.__viewId];
 };
 
+
+/**
+ *  更新方法，里面有几个部分
+ *  	prepareAndUpdate
+ * 		update
+ * 		updateTransform
+ *
+ * 		updateView
+ * 		updateVisual
+ * 		updateLayout
+ * */
+
 var updateMethods = {
 
     prepareAndUpdate: function (payload) {
@@ -861,7 +873,7 @@ var updateMethods = {
         clearColorPalette(ecModel);
         scheduler.performVisualTasks(ecModel, payload);
 
-        render(this, ecModel, api, payload);
+        render(this, ecModel, api, payload);           //进行视图渲染
 
         // Set background
         var backgroundColor = ecModel.get('backgroundColor') || 'transparent';
@@ -1015,7 +1027,7 @@ var updateMethods = {
     }
 };
 
-function prepare(ecIns) {
+function prepare(ecIns) {                //这个准备主要是 任务调度准备。
     var ecModel = ecIns._model;
     var scheduler = ecIns._scheduler;
 
@@ -1498,7 +1510,7 @@ function clearColorPalette(ecModel) {
     });
 }
 
-function render(ecIns, ecModel, api, payload) {
+function render(ecIns, ecModel, api, payload) {    //render方法分为renderComponents（渲染Component）以及renderSeries（渲染series）两大部分，
 
     renderComponents(ecIns, ecModel, api, payload);
 
@@ -1654,7 +1666,7 @@ echartsProto._initEvents = function () {
         // which probably update any of the content and probably
         // cause problem if it is called previous other inner handlers.
         handler.zrEventfulCallAtLast = true;
-        this._zr.on(eveName, handler, this);
+        this._zr.on(eveName, handler, this);                         //沿用zrender的 鼠标事件系统
     }, this);
 
     each(eventActionMap, function (actionType, eventType) {
@@ -1981,7 +1993,7 @@ var idBase = new Date() - 0;
 var groupIdBase = new Date() - 0;
 var DOM_ATTRIBUTE_KEY = '_echarts_instance_';
 
-function enableConnect(chart) {
+function enableConnect(chart) {                         //打开  连接  --------连接什么，到哪里？
     var STATUS_PENDING = 0;
     var STATUS_UPDATING = 1;
     var STATUS_UPDATED = 2;
@@ -2035,7 +2047,7 @@ function enableConnect(chart) {
  */
 export function init(dom, theme, opts) {
     if (__DEV__) {
-        // Check version
+        // Check version  检查zrender的版本
         if ((zrender.version.replace('.', '') - 0) < (dependencies.zrender.replace('.', '') - 0)) {
             throw new Error(
                 'zrender/src ' + zrender.version
@@ -2050,7 +2062,7 @@ export function init(dom, theme, opts) {
         }
     }
 
-    var existInstance = getInstanceByDom(dom);
+    var existInstance = getInstanceByDom(dom);     //从Dom上面获取实例，  是否这个Dom已经被占用，   DOM上会加上一个属性 __echarts_instance_1
     if (existInstance) {
         if (__DEV__) {
             console.warn('There is a chart instance already initialized on the dom.');
@@ -2059,7 +2071,7 @@ export function init(dom, theme, opts) {
     }
 
     if (__DEV__) {
-        if (zrUtil.isDom(dom)
+        if (zrUtil.isDom(dom)                           //检查是不是DOM 能不能获取宽高，
             && dom.nodeName.toUpperCase() !== 'CANVAS'
             && (
                 (!dom.clientWidth && (!opts || opts.width == null))
@@ -2425,7 +2437,7 @@ registerLoading('default', loadingDefault);
 
 // Default actions
 
-registerAction({
+registerAction({     //能够通过dispatchAction使用的api，首先必须通过registerAction注册api
     type: 'highlight',
     event: 'highlight',
     update: 'highlight'
